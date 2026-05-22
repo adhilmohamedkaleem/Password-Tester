@@ -2,133 +2,119 @@ import tkinter as tk
 import re
 
 # -----------------------------
-# Estimate Crack Time
+# Crack Time Function
 # -----------------------------
-def estimate_crack_time(password):
+def crack_time(password):
 
-    charset = 0
+    chars = 0
 
     if re.search(r"[a-z]", password):
-        charset += 26
+        chars += 26
 
     if re.search(r"[A-Z]", password):
-        charset += 26
+        chars += 26
 
     if re.search(r"\d", password):
-        charset += 10
+        chars += 10
 
     if re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
-        charset += 32
+        chars += 32
 
-    length = len(password)
+    if chars == 0:
+        return "0 sec"
 
-    if charset == 0 or length == 0:
-        return "Instantly"
+    combinations = chars ** len(password)
 
-    combinations = charset ** length
+    seconds = combinations / 1_000_000_000
 
-    guesses_per_second = 1_000_000_000
+    if seconds < 60:
+        return f"{int(seconds)} sec"
 
-    seconds = combinations / guesses_per_second
+    elif seconds < 3600:
+        return f"{int(seconds / 60)} min"
 
-    return convert_time(seconds)
+    elif seconds < 86400:
+        return f"{int(seconds / 3600)} hrs"
 
-
-# -----------------------------
-# Convert Time
-# -----------------------------
-def convert_time(seconds):
-
-    minute = 60
-    hour = 3600
-    day = 86400
-    year = 31536000
-
-    if seconds < 1:
-        return "Less than 1 second"
-
-    elif seconds < minute:
-        return f"{int(seconds)} seconds"
-
-    elif seconds < hour:
-        return f"{int(seconds / minute)} minutes"
-
-    elif seconds < day:
-        return f"{int(seconds / hour)} hours"
-
-    elif seconds < year:
-        return f"{int(seconds / day)} days"
-
-    elif seconds < year * 1000:
-        return f"{int(seconds / year)} years"
+    elif seconds < 31536000:
+        return f"{int(seconds / 86400)} days"
 
     else:
-        return "Thousands of years"
+        return f"{int(seconds / 31536000)} years"
 
 
 # -----------------------------
 # Password Checker
 # -----------------------------
-def check_strength(event=None):
+def check(event=None):
 
     password = entry.get()
 
     score = 0
-    feedback = []
+    length = len(password)
+
+    has_upper = re.search(r"[A-Z]", password)
+    has_lower = re.search(r"[a-z]", password)
+    has_number = re.search(r"\d", password)
+    has_symbol = re.search(r"[!@#$%^&*(),.?\":{}|<>]", password)
 
     # Length
-    if len(password) >= 8:
+    if length >= 6:
         score += 1
+        length_check.config(text="☑ Minimum 6 Characters", fg="green")
     else:
-        feedback.append("Use at least 8 characters")
+        length_check.config(text="☐ Minimum 6 Characters", fg="red")
 
     # Uppercase
-    if re.search(r"[A-Z]", password):
+    if has_upper:
         score += 1
+        upper_check.config(text="☑ Uppercase Letter", fg="green")
     else:
-        feedback.append("Add uppercase letter")
+        upper_check.config(text="☐ Uppercase Letter", fg="red")
 
     # Lowercase
-    if re.search(r"[a-z]", password):
+    if has_lower:
         score += 1
+        lower_check.config(text="☑ Lowercase Letter", fg="green")
     else:
-        feedback.append("Add lowercase letter")
+        lower_check.config(text="☐ Lowercase Letter", fg="red")
 
     # Number
-    if re.search(r"\d", password):
+    if has_number:
         score += 1
+        number_check.config(text="☑ Number", fg="green")
     else:
-        feedback.append("Add a number")
+        number_check.config(text="☐ Number", fg="red")
 
-    # Special Character
-    if re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+    # Symbol
+    if has_symbol:
         score += 1
+        symbol_check.config(text="☑ Special Symbol", fg="green")
     else:
-        feedback.append("Add special character")
+        symbol_check.config(text="☐ Special Symbol", fg="red")
 
-    # Strength Levels
+    # Strength
     if score <= 2:
-        strength = "Weak"
-        color = "#ff4d4d"
+        text = "Weak"
+        color = "red"
         width = 80
 
     elif score <= 4:
-        strength = "Medium"
-        color = "#ffaa00"
+        text = "Medium"
+        color = "orange"
         width = 180
 
     else:
-        strength = "Strong"
-        color = "#00cc66"
+        text = "Strong"
+        color = "green"
         width = 300
 
-    # Update Strength Label
-    strength_label.config(
-        text=f"Password Strength: {strength}",
+    strength.config(
+        text=f"Strength: {text}",
         fg=color
     )
 
-    # Update Bar
+    # Progress Bar
     canvas.delete("bar")
 
     canvas.create_rectangle(
@@ -141,49 +127,37 @@ def check_strength(event=None):
         tags="bar"
     )
 
-    # Suggestions
-    if feedback:
-        tips_label.config(
-            text="Suggestions:\n" + "\n".join(feedback)
-        )
-
-    else:
-        tips_label.config(
-            text="Excellent Password ✅"
-        )
-
     # Crack Time
-    crack_time = estimate_crack_time(password)
-
-    crack_label.config(
-        text=f"Estimated Crack Time: {crack_time}"
+    crack.config(
+        text=f"Crack Time: {crack_time(password)}"
     )
 
 
 # -----------------------------
-# Toggle Password Visibility
+# Show / Hide Password
 # -----------------------------
-def toggle_password():
+def toggle():
 
     if entry.cget("show") == "*":
         entry.config(show="")
-        toggle_btn.config(text="Hide")
+        btn.config(text="Hide")
 
     else:
         entry.config(show="*")
-        toggle_btn.config(text="Show")
+        btn.config(text="Show")
 
 
 # -----------------------------
-# GUI Window
+# Main Window
 # -----------------------------
 root = tk.Tk()
 
-root.title("Password Tester")
+root.title("Password Strength Tester")
 
-root.geometry("500x420")
+root.geometry("500x500")
 
 root.config(bg="#121212")
+
 
 # -----------------------------
 # Title
@@ -191,62 +165,68 @@ root.config(bg="#121212")
 title = tk.Label(
     root,
     text="Password Strength Tester",
-    font=("Arial", 20, "bold"),
+    font=("Arial", 18, "bold"),
     bg="#121212",
     fg="white"
 )
 
 title.pack(pady=20)
 
+
 # -----------------------------
-# Password Entry Frame
+# Entry Frame
 # -----------------------------
 frame = tk.Frame(root, bg="#121212")
-frame.pack(pady=10)
 
-# Entry
+frame.pack()
+
+
+# -----------------------------
+# Password Entry
+# -----------------------------
 entry = tk.Entry(
     frame,
-    width=28,
+    width=25,
     font=("Arial", 14),
     bg="#1e1e1e",
     fg="white",
     insertbackground="white",
-    relief="flat",
     show="*"
 )
 
-entry.pack(side="left", padx=10, ipady=8)
+entry.pack(side="left", padx=10, ipady=6)
 
-# Real-time Detection
-entry.bind("<KeyRelease>", check_strength)
+entry.bind("<KeyRelease>", check)
 
-# Show/Hide Button
-toggle_btn = tk.Button(
+
+# -----------------------------
+# Toggle Button
+# -----------------------------
+btn = tk.Button(
     frame,
     text="Show",
-    command=toggle_password,
+    command=toggle,
     bg="#333333",
     fg="white",
-    activebackground="#444444",
-    activeforeground="white",
     relief="flat"
 )
 
-toggle_btn.pack(side="left")
+btn.pack(side="left")
+
 
 # -----------------------------
 # Strength Label
 # -----------------------------
-strength_label = tk.Label(
+strength = tk.Label(
     root,
-    text="Type a password...",
+    text="Type Password...",
     font=("Arial", 12, "bold"),
     bg="#121212",
     fg="white"
 )
 
-strength_label.pack(pady=15)
+strength.pack(pady=20)
+
 
 # -----------------------------
 # Progress Bar
@@ -259,34 +239,76 @@ canvas = tk.Canvas(
     highlightthickness=0
 )
 
-canvas.pack(pady=5)
+canvas.pack(pady=10)
+
 
 # -----------------------------
-# Crack Time Label
+# Crack Time
 # -----------------------------
-crack_label = tk.Label(
+crack = tk.Label(
     root,
-    text="Estimated Crack Time:",
-    font=("Arial", 11, "bold"),
+    text="Crack Time:",
+    font=("Arial", 11),
     bg="#121212",
-    fg="#cccccc"
+    fg="white"
 )
 
-crack_label.pack(pady=20)
+crack.pack(pady=15)
+
 
 # -----------------------------
-# Suggestions Label
+# Checkboxes
 # -----------------------------
-tips_label = tk.Label(
+length_check = tk.Label(
     root,
-    text="",
-    font=("Arial", 10),
+    text="☐ Minimum 6 Characters",
     bg="#121212",
-    fg="#bbbbbb",
-    justify="left"
+    fg="red",
+    font=("Arial", 11)
 )
 
-tips_label.pack(pady=10)
+length_check.pack(anchor="w", padx=100)
+
+upper_check = tk.Label(
+    root,
+    text="☐ Uppercase Letter",
+    bg="#121212",
+    fg="red",
+    font=("Arial", 11)
+)
+
+upper_check.pack(anchor="w", padx=100)
+
+lower_check = tk.Label(
+    root,
+    text="☐ Lowercase Letter",
+    bg="#121212",
+    fg="red",
+    font=("Arial", 11)
+)
+
+lower_check.pack(anchor="w", padx=100)
+
+number_check = tk.Label(
+    root,
+    text="☐ Number",
+    bg="#121212",
+    fg="red",
+    font=("Arial", 11)
+)
+
+number_check.pack(anchor="w", padx=100)
+
+symbol_check = tk.Label(
+    root,
+    text="☐ Special Symbol",
+    bg="#121212",
+    fg="red",
+    font=("Arial", 11)
+)
+
+symbol_check.pack(anchor="w", padx=100)
+
 
 # -----------------------------
 # Run App

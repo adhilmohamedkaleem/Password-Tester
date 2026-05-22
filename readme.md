@@ -16,6 +16,8 @@ This application analyzes passwords in **real time** and estimates how long it w
 * 📊 Password Strength Meter
 * 🔓 Estimated Crack Time
 * 👁️ Show / Hide Password
+* 🔢 Live Character Counter
+* ☑️ Password Requirement Checkboxes
 * 💡 Password Improvement Suggestions
 * 🛡️ Detects:
 
@@ -23,7 +25,37 @@ This application analyzes passwords in **real time** and estimates how long it w
   * Lowercase letters
   * Numbers
   * Special characters
-  * Password length
+  * Minimum 6 characters
+
+---
+
+## ☑️ Password Requirement System
+
+The application displays live checkbox validation while typing.
+
+### Requirements
+
+| Requirement          | Status |
+| -------------------- | ------ |
+| Minimum 6 Characters | ☑️     |
+| Uppercase Letter     | ☑️     |
+| Lowercase Letter     | ☑️     |
+| Number               | ☑️     |
+| Special Symbol       | ☑️     |
+
+The checkbox turns green when the requirement is satisfied.
+
+---
+
+## 🔢 Character Counter
+
+The app also displays:
+
+```text
+Strength: Strong (12 chars)
+```
+
+This helps users understand how password length affects security.
 
 ---
 
@@ -84,7 +116,7 @@ The application calculates password strength using:
 | ----- | --------- |
 | 0 - 2 | Weak 🔴   |
 | 3 - 4 | Medium 🟡 |
-| 5     | Strong 🟢 |
+| 5+    | Strong 🟢 |
 
 ---
 
@@ -131,4 +163,4 @@ This project is licensed under the MIT License.
 
 ## 👨‍💻 Author
 
-Made with ❤️ by Adhil Kaleem
+Made by Adhilmohamed Kaleem
